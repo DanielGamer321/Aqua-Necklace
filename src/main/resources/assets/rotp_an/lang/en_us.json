@@ -1,0 +1,15 @@
+{
+  "entity.jojo.aqua_necklace": "Aqua Necklace",
+  "stand.rotp_an.aqua_necklace": "Aqua Necklace",
+  "action.rotp_an.aqua_necklace_punch": "Punch",
+  "action.rotp_an.aqua_necklace_heavy_punch": "Heavy Punch",
+  "action.rotp_an.aqua_necklace_brain_attack": "Brain attack",
+  "action.rotp_an.aqua_necklace_get_into_the_lungs": "Get into the lung",
+  "action.rotp_an.aqua_necklace_block": "Block",
+  "action.rotp_an.aqua_necklace_change_to_liquid": "Become liquid",
+  "action.rotp_an.aqua_necklace_change_to_liquid.undo": "Back to normal",
+  "action.rotp_an.aqua_necklace_change_to_gaseous": "Become vapor",
+  "action.rotp_an.aqua_necklace_change_to_gaseous.undo": "Back to normal",
+  "action.rotp_an.aqua_necklace_getting_into_entity": "Getting into the entity",
+  "action.rotp_an.aqua_necklace_leave_the_entity": "Leave the entity"
+}
