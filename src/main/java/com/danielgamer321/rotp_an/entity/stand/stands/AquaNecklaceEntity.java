@@ -184,6 +184,9 @@ public class AquaNecklaceEntity extends StandEntity {
                 }
             }
         }
+        if (getState() != 2) {
+            damageAmount = getState() == 0 ? damageAmount * 0 : damageAmount * 0.1F;
+        }
         super.actuallyHurt(dmgSource, damageAmount);
     }
 
@@ -230,17 +233,6 @@ public class AquaNecklaceEntity extends StandEntity {
             }
         }
         return damage;
-    }
-
-    @Override
-    public boolean isInvulnerableTo(DamageSource damageSrc) {
-        if (getState() == 0 && !(damageSrc.isBypassArmor() && damageSrc.isBypassMagic())) {
-            if (damageSrc == DamageSource.OUT_OF_WORLD) {
-                return super.isInvulnerableTo(damageSrc);
-            }
-            return true;
-        }
-        return super.isInvulnerableTo(damageSrc);
     }
 
     public boolean canBlockDamage(DamageSource dmgSource) {
