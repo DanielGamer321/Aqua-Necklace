@@ -1,6 +1,7 @@
 package com.danielgamer321.rotp_an.action.stand;
 
 import com.danielgamer321.rotp_an.entity.stand.stands.AquaNecklaceEntity;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.StandEntityLightAttack;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
@@ -12,10 +13,26 @@ import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
+import java.util.function.Supplier;
+
 public class AquaNecklacePunch extends StandEntityLightAttack {
+    private final Supplier<StandEntityLightAttack> normalAttack;
+
+    public AquaNecklacePunch(Builder builder, Supplier<StandEntityLightAttack> normalAttack) {
+        super(builder.addExtraUnlockable(normalAttack));
+        this.normalAttack = normalAttack != null ? normalAttack : () -> null;
+    }
 
     public AquaNecklacePunch(Builder builder) {
         super(builder);
+        this.normalAttack = null;
+    }
+
+    @Override
+    protected Action<IStandPower> replaceAction(IStandPower power, ActionTarget target) {
+        return power.isActive() && power.getStandManifestation() instanceof AquaNecklaceEntity
+                && !((AquaNecklaceEntity) power.getStandManifestation()).isInside() && normalAttack.get() != null
+                ? normalAttack.get() : this;
     }
 
     @Override

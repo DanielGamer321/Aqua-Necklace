@@ -32,9 +32,13 @@ public class InitStands {
 
     // ======================================== Aqua Necklace ========================================
 
-    public static final RegistryObject<StandEntityAction> AQUA_NECKLACE_PUNCH = ACTIONS.register("aqua_necklace_punch",
+    public static final RegistryObject<StandEntityLightAttack> AQUA_NECKLACE_PUNCH_OUT = ACTIONS.register("aqua_necklace_punch_out",
             () -> new AquaNecklacePunch(new StandEntityLightAttack.Builder().standUserWalkSpeed(1F)
                     .punchSound(ModSounds.STAND_PUNCH_LIGHT)));
+
+    public static final RegistryObject<StandEntityLightAttack> AQUA_NECKLACE_PUNCH = ACTIONS.register("aqua_necklace_punch",
+            () -> new AquaNecklacePunch(new StandEntityLightAttack.Builder().standUserWalkSpeed(1F)
+                    .punchSound(ModSounds.STAND_PUNCH_LIGHT), AQUA_NECKLACE_PUNCH_OUT));
 
     public static final RegistryObject<StandEntityHeavyAttack> AQUA_NECKLACE_BRAIN_ATTACK = ACTIONS.register("aqua_necklace_brain_attack",
             () -> new AquaNecklaceBrainAttack(new StandEntityHeavyAttack.Builder().standUserWalkSpeed(1F)

@@ -2,6 +2,7 @@
   "entity.jojo.aqua_necklace": "Aqua Necklace",
   "stand.rotp_an.aqua_necklace": "Aqua Necklace",
   "action.rotp_an.aqua_necklace_punch": "Puñetazo",
+  "action.rotp_an.aqua_necklace_punch_out": "Puñetazo",
   "action.rotp_an.aqua_necklace_brain_attack": "Ataque al cerebro",
   "action.rotp_an.aqua_necklace_heavy_punch": "Golpe fuerte",
   "action.rotp_an.aqua_necklace_block": "Bloquear",

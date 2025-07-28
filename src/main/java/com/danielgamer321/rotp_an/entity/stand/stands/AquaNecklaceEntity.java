@@ -265,13 +265,6 @@ public class AquaNecklaceEntity extends StandEntity {
             }
         }
         if (getState() != 2 && (canPassThroughBlocks(this.getDeltaMovement()) || crossingBlocks(true)) && shouldHaveNoPhysics()) {
-            if (getState() == 1 && !isInside()) {
-                this.level.getEntitiesOfClass(PlayerEntity.class, this.getBoundingBox().inflate(32)).forEach(entity -> {
-                    if (entity.level.isClientSide() && ClientUtil.canSeeStands()) {
-                        this.doWaterSplashEffect();
-                    }
-                });
-            }
             updateNoPhysics();
         }
         else {
@@ -294,7 +287,7 @@ public class AquaNecklaceEntity extends StandEntity {
                 stand.consumeStamina(40);
             });
         }
-        if (isInside() && this.getBoundingBox().getSize() * 1.25D >= getTargetInside().getBoundingBox().getSize()) {
+        if (isInside() && this.getBoundingBox().getSize() * 1.5D >= getTargetInside().getBoundingBox().getSize()) {
             StandEntityDamageSource damage = new StandEntityDamageSource("stand", this, getUserPower());
             damage.bypassArmor();
             DamageUtil.hurtThroughInvulTicks(getTargetInside(), damage.setKnockbackReduction(0), getTargetInside().getMaxHealth());
@@ -302,10 +295,10 @@ public class AquaNecklaceEntity extends StandEntity {
         if ((isInside() && !AquaNecklaceHeavyPunch.isASkeleton(getTargetInside()) && !getTargetInside().hasEffect(Effects.INVISIBILITY.getEffect()))
                 ||(getState() == 1 && isInWater())) {
             this.addEffect(new EffectInstance(ModStatusEffects.FULL_INVISIBILITY.get(), 2, 0, false, false, true));
-            this.addEffect(new EffectInstance(Effects.BLINDNESS, 2, 0, false, false, true));
+            getUser().addEffect(new EffectInstance(Effects.BLINDNESS, 2, 0, false, false, true));
         }
-        if (crossingBlocks(false)) {
-            this.addEffect(new EffectInstance(Effects.BLINDNESS, 2, 0, false, false, true));
+        if (getState() != 2 && crossingBlocks(false)) {
+            getUser().addEffect(new EffectInstance(Effects.BLINDNESS, 2, 0, false, false, true));
         }
     }
 
