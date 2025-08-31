@@ -4,6 +4,7 @@ import com.danielgamer321.rotp_an.entity.stand.stands.AquaNecklaceEntity;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
@@ -31,12 +32,15 @@ public class AquaNecklaceBrainAttack extends AquaNecklaceHeavyPunch {
     @Override
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         AquaNecklaceEntity aqua = (AquaNecklaceEntity) stand;
+        double strength = stand.getAttackDamage() * 0.75;
         if (aqua.isInside()) {
             dmgSource.bypassArmor();
         }
         return new BrainAttackInstance(stand, target, dmgSource)
                 .copyProperties(super.punchEntity(stand, target, dmgSource))
-                .addKnockback(0);
+                .damage(StandStatFormulas.getHeavyAttackDamage(strength) * 2)
+                .addKnockback(0)
+                .reduceKnockback(0);
     }
 
 

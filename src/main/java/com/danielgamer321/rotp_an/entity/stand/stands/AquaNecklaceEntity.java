@@ -6,8 +6,13 @@ import com.danielgamer321.rotp_an.util.AddonInteractionUtil;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.entity.MRDetectorEntity;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.MRFireballEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.MRRedBindEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
@@ -15,6 +20,8 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
@@ -27,9 +34,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.shapes.VoxelShapes;
@@ -167,11 +176,11 @@ public class AquaNecklaceEntity extends StandEntity {
             LivingEntity targetInside = getTargetInside();
             if (AttackedByHisStand(entity, targetInside) && targetInside.isAlive()) {
                 if (AddonInteractionUtil.isTheHand(entity) && dmgSource.isBypassArmor() && dmgSource.isBypassMagic()) {
-                    DamageUtil.hurtThroughInvulTicks(targetInside, dmgSource, damageAmount == getEraseDamage(this, damageAmount) ? getEraseDamage(targetInside, damageAmount) :
-                            getEraseDamage(targetInside, (StandEntity) entity, damageAmount));
+                    DamageUtil.hurtThroughInvulTicks(targetInside, getDamageSource((StandEntityDamageSource) dmgSource),
+                            damageAmount == getEraseDamage(this, (StandEntity) entity, damageAmount) ? getEraseDamage(targetInside, (StandEntity) entity, damageAmount) : 8);
                 }
                 else {
-                    DamageUtil.hurtThroughInvulTicks(targetInside, dmgSource, damageAmount);
+                    DamageUtil.hurtThroughInvulTicks(targetInside, getDamageSource((StandEntityDamageSource) dmgSource), damageAmount);
                 }
             }
             if (!(dmgSource.isBypassArmor() && dmgSource.isBypassMagic())) {
@@ -184,10 +193,28 @@ public class AquaNecklaceEntity extends StandEntity {
                 }
             }
         }
+        if (dmgSource.isProjectile() && dmgSource.getDirectEntity() != null) {
+            Entity projectile = dmgSource.getDirectEntity();
+            if (projectile instanceof MRFireballEntity || projectile instanceof MRFlameEntity ||
+                    projectile instanceof MRCrossfireHurricaneEntity || projectile instanceof MRRedBindEntity ||
+                    projectile instanceof MRDetectorEntity) {
+                damageAmount /= 2;
+            }
+        }
         if (getState() != 2) {
             damageAmount = getState() == 0 ? damageAmount * 0 : damageAmount * 0.1F;
         }
         super.actuallyHurt(dmgSource, damageAmount);
+    }
+
+    private static StandEntityDamageSource getDamageSource(StandEntityDamageSource source) {
+        StandEntityDamageSource newSource = new StandEntityDamageSource("stand", source.getDirectEntity() != null ? source.getDirectEntity() : null,
+                source.getStandPower() != null ? source.getStandPower() : null);
+        newSource.setKnockbackReduction(source.getKnockbackFactor());
+        if (newSource.preventsDamagingArmor()) {
+            newSource.setPreventDamagingArmor();
+        }
+        return newSource;
     }
 
     private boolean AttackedByHisStand(Entity directEntity, LivingEntity standUser) {
@@ -201,22 +228,6 @@ public class AquaNecklaceEntity extends StandEntity {
             }
         }
         return false;
-    }
-
-    public static float getEraseDamage(LivingEntity target, float damageAmount) {
-        float damage = 0;
-        if (target.isAlive()) {
-            float size = (float) target.getBoundingBox().getSize();
-            float eraseSpace = Math.max(size > 1.09 ? 1 - (size / 5) : 1 - (size - 1), 0.05F);
-            damage = target.getMaxHealth() * ((size > 1.5 ? 0.5F : 0.8F) * eraseSpace);
-            if (damageAmount == damage) {
-                return damage;
-            }
-            else {
-                damage = StandStatFormulas.getHeavyAttackDamage(16);
-            }
-        }
-        return damage;
     }
 
     public static float getEraseDamage(LivingEntity target, StandEntity stand, float damageAmount) {
@@ -255,6 +266,17 @@ public class AquaNecklaceEntity extends StandEntity {
     @Override
     public void tick() {
         super.tick();
+        if (getRemainingFireTicks() > 0) {
+            this.setSecondsOnFire(0);
+            if (!isInside() || (isInside() && (AquaNecklaceHeavyPunch.isASkeleton(getTargetInside())))) {
+                MCUtil.playSound(level, null, this.getX(), this.getY(), this.getZ(),
+                        SoundEvents.FIRE_EXTINGUISH, this.getSoundSource(), 1.0F, 1.0F, StandUtil::playerCanHearStands);
+                if (ClientUtil.canSeeStands()) {
+                    ((ServerWorld)level).sendParticles(ParticleTypes.SMOKE, this.getX(), this.getY(), this.getZ(), 8,
+                            this.getBbWidth() / 2F, this.getBbHeight() / 2F, this.getBbWidth() / 2F, 0);
+                }
+            }
+        }
         LivingEntity user = getUser();
         if (user != null && user.level == this.level) {
             double distanceSqr = distanceToSqr(user);
@@ -292,13 +314,15 @@ public class AquaNecklaceEntity extends StandEntity {
             damage.bypassArmor();
             DamageUtil.hurtThroughInvulTicks(getTargetInside(), damage.setKnockbackReduction(0), getTargetInside().getMaxHealth());
         }
-        if ((isInside() && !AquaNecklaceHeavyPunch.isASkeleton(getTargetInside()) && !getTargetInside().hasEffect(Effects.INVISIBILITY.getEffect()))
-                ||(getState() == 1 && isInWater())) {
-            this.addEffect(new EffectInstance(ModStatusEffects.FULL_INVISIBILITY.get(), 2, 0, false, false, true));
-            getUser().addEffect(new EffectInstance(Effects.BLINDNESS, 2, 0, false, false, true));
+        boolean canSee = getTargetInside() != null && (AquaNecklaceHeavyPunch.isASkeleton(getTargetInside()));
+        if ((isInside() && !canSee) || (getState() == 1 && isInWaterOrRain() && getCurrentTaskAction() != InitStands.AQUA_NECKLACE_GETTING_INTO_ENTITY.get())) {
+            this.addEffect(new EffectInstance(ModStatusEffects.FULL_INVISIBILITY.get(), 2, 0, false, false, false));
+            if (user != null && isInside() && !canSee) {
+                this.addEffect(new EffectInstance(Effects.BLINDNESS, 21, 0, false, false, false));
+            }
         }
-        if (getState() != 2 && crossingBlocks(false)) {
-            getUser().addEffect(new EffectInstance(Effects.BLINDNESS, 2, 0, false, false, true));
+        if (user != null && getState() != 2 && crossingBlocks(false)) {
+            getUser().addEffect(new EffectInstance(Effects.BLINDNESS, 10, 0, false, false, false));
         }
     }
 
@@ -506,5 +530,9 @@ public class AquaNecklaceEntity extends StandEntity {
     @Override
     public boolean isPickable() {
         return (getState() != 0 && super.isPickable()) || (getState() == 0 && isInside() && super.isPickable());
+    }
+
+    public boolean isOnFire() {
+        return false;
     }
 }
