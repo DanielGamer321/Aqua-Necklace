@@ -93,7 +93,7 @@ public class AquaNecklaceModel extends HumanoidStandModel<AquaNecklaceEntity> {
 	@Override
 	protected IModelPose<AquaNecklaceEntity> initBaseIdlePose() {
 		return new ConditionalModelPose<AquaNecklaceEntity>()
-				.addPose(aqua -> aqua != null && aqua.getState() >= 1,
+				.addPose(aqua -> aqua == null || aqua.getState() >= 1,
 						new ModelPose<AquaNecklaceEntity>(new RotationAngle[] {
 								RotationAngle.fromDegrees(body, 12.5F, 0F, 0F),
 								RotationAngle.fromDegrees(upperPart, 0F, 0F, 0F),
@@ -133,7 +133,7 @@ public class AquaNecklaceModel extends HumanoidStandModel<AquaNecklaceEntity> {
 	@Override
 	protected IModelPose<AquaNecklaceEntity> initIdlePose2Loop() {
 		return new ConditionalModelPose<AquaNecklaceEntity>()
-				.addPose(aqua -> aqua != null && aqua.getState() >= 1,
+				.addPose(aqua -> aqua == null || aqua.getState() >= 1,
 						new ModelPose<>(new RotationAngle[] {
 								RotationAngle.fromDegrees(leftArm, -23.9215F, 44.8097F, -46.8648F),
 								RotationAngle.fromDegrees(leftArmJoint, -15F, 0F, 0F),

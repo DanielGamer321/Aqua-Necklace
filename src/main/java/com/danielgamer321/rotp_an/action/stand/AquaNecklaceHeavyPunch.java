@@ -86,7 +86,6 @@ public class AquaNecklaceHeavyPunch extends StandEntityHeavyAttack {
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         double strength = stand.getAttackDamage() * 0.75;
         if (stand instanceof AquaNecklaceEntity && ((AquaNecklaceEntity)stand).isInside()) {
-            dmgSource.bypassArmor();
             strength = 0;
         }
         return super.punchEntity(stand, target, dmgSource)

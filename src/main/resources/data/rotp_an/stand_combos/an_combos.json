@@ -1,0 +1,17 @@
+{
+  "rotp_an:aqua_necklace": {
+    "use_by_resolve": {
+      "0lvl": ["basic_combo"],
+      "1lvl": ["basic_combo"],
+      "2lvl": ["basic_combo"],
+      "3lvl": ["basic_combo"],
+      "4lvl": ["basic_combo"]
+    },
+    "block": "rotp_an:aqua_necklace_block",
+    "basic_combo": [
+      { "action": "rotp_an:aqua_necklace_punch", "distance": "<=4" },
+      { "action": "rotp_an:aqua_necklace_punch", "distance": "<=4" },
+      { "action": "rotp_an:aqua_necklace_punch", "distance": "<=4" }
+    ]
+  }
+}

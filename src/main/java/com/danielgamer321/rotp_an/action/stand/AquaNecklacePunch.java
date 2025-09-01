@@ -4,13 +4,11 @@ import com.danielgamer321.rotp_an.entity.stand.stands.AquaNecklaceEntity;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.StandEntityLightAttack;
-import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.world.World;
 
 import java.util.function.Supplier;
@@ -30,9 +28,10 @@ public class AquaNecklacePunch extends StandEntityLightAttack {
 
     @Override
     protected Action<IStandPower> replaceAction(IStandPower power, ActionTarget target) {
-        return power.isActive() && power.getStandManifestation() instanceof AquaNecklaceEntity
-                && !((AquaNecklaceEntity) power.getStandManifestation()).isInside() && normalAttack.get() != null
-                ? normalAttack.get() : this;
+        boolean isActive = power.isActive() && power.getStandManifestation() instanceof AquaNecklaceEntity;
+        AquaNecklaceEntity aqua = (AquaNecklaceEntity) power.getStandManifestation();
+        return (!isActive || (isActive && (!aqua.isInside() || (aqua.isInside() && (AquaNecklaceHeavyPunch.isASkeleton(aqua.getTargetInside()) ||
+                aqua.getTargetInside() instanceof GolemEntity))))) && normalAttack.get() != null ? normalAttack.get() : this;
     }
 
     @Override
@@ -52,13 +51,5 @@ public class AquaNecklacePunch extends StandEntityLightAttack {
                 aqua.setTaskTarget(target);
             }
         }
-    }
-
-    @Override
-    public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
-        if (stand instanceof AquaNecklaceEntity && ((AquaNecklaceEntity)stand).isInside()) {
-            dmgSource.bypassArmor();
-        }
-        return super.punchEntity(stand, target, dmgSource);
     }
 }

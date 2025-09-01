@@ -78,7 +78,7 @@ public class InitStands {
                     .partsRequired(StandPart.MAIN_BODY)));
 
     public static final RegistryObject<StandEntityAction> AQUA_NECKLACE_LEAVE_THE_ENTITY = ACTIONS.register("aqua_necklace_leave_the_entity",
-            () -> new AquaNecklaceLeaveTheEntity(new StandEntityAction.Builder().cooldown(5)
+            () -> new AquaNecklaceLeaveTheEntity(new StandEntityAction.Builder().cooldown(10)
                     .resolveLevelToUnlock(2)
                     .partsRequired(StandPart.MAIN_BODY)));
 

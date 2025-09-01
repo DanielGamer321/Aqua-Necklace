@@ -3,6 +3,7 @@ package com.danielgamer321.rotp_an.entity.stand.stands;
 import com.danielgamer321.rotp_an.action.stand.AquaNecklaceHeavyPunch;
 import com.danielgamer321.rotp_an.init.InitStands;
 import com.danielgamer321.rotp_an.util.AddonInteractionUtil;
+import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -13,12 +14,10 @@ import com.github.standobyte.jojo.entity.damaging.projectile.MRFireballEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.MRRedBindEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntityType;
-import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
-import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
+import com.github.standobyte.jojo.entity.stand.*;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -48,6 +47,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 public class AquaNecklaceEntity extends StandEntity {
 
@@ -85,6 +85,15 @@ public class AquaNecklaceEntity extends StandEntity {
                 entityData.set(TARGET_INSIDE_ID, -1);
             }
         }
+    }
+
+    @Override
+    public boolean attackEntity(Supplier<Boolean> doAttack, StandEntityPunch punch, StandEntityTask task) {
+        if (isInside()) punch.dmgSource.bypassArmor();
+        if (punch.target instanceof LivingEntity && ((LivingEntity)punch.target).isSensitiveToWater()) {
+            punch.damage(punch.getDamage() * 1.5F);
+        }
+        return super.attackEntity(doAttack, punch, task);
     }
 
     public int getState() {
@@ -180,12 +189,23 @@ public class AquaNecklaceEntity extends StandEntity {
                             damageAmount == getEraseDamage(this, (StandEntity) entity, damageAmount) ? getEraseDamage(targetInside, (StandEntity) entity, damageAmount) : 8);
                 }
                 else {
-                    DamageUtil.hurtThroughInvulTicks(targetInside, getDamageSource((StandEntityDamageSource) dmgSource), damageAmount);
+                    float dmg = entity instanceof SCRapierEntity ? 0 : damageAmount;
+                    if (AquaNecklaceHeavyPunch.isASkeleton(getTargetInside()) && entity instanceof SilverChariotEntity) {
+                        if (((SilverChariotEntity) entity).getCurrentTaskAction() == ModStandsInit.SILVER_CHARIOT_RAPIER_BARRAGE.get()) {
+                            dmg *= 0.25F;
+                        }
+                        else {
+                            dmg = 0;
+                        }
+                    }
+                    if (dmg > 0) {
+                        DamageUtil.hurtThroughInvulTicks(targetInside, getDamageSource((StandEntityDamageSource) dmgSource), dmg);
+                    }
                 }
             }
             if (!(dmgSource.isBypassArmor() && dmgSource.isBypassMagic())) {
-                if ((entity instanceof SCRapierEntity || (entity instanceof SilverChariotEntity && ((SilverChariotEntity)entity).hasRapier())) &&
-                        AquaNecklaceHeavyPunch.isASkeleton(getTargetInside())) {
+                if (AquaNecklaceHeavyPunch.isASkeleton(getTargetInside()) && entity instanceof SilverChariotEntity &&
+                        ((SilverChariotEntity) entity).getCurrentTaskAction() == ModStandsInit.SILVER_CHARIOT_RAPIER_BARRAGE.get()) {
                     damageAmount *= 0.75F;
                 }
                 else {

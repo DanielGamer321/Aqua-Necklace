@@ -31,11 +31,7 @@ public class AquaNecklaceBrainAttack extends AquaNecklaceHeavyPunch {
 
     @Override
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
-        AquaNecklaceEntity aqua = (AquaNecklaceEntity) stand;
         double strength = stand.getAttackDamage() * 0.75;
-        if (aqua.isInside()) {
-            dmgSource.bypassArmor();
-        }
         return new BrainAttackInstance(stand, target, dmgSource)
                 .copyProperties(super.punchEntity(stand, target, dmgSource))
                 .damage(StandStatFormulas.getHeavyAttackDamage(strength) * 2)
