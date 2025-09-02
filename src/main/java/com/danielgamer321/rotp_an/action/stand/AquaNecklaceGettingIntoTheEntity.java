@@ -44,10 +44,8 @@ public class AquaNecklaceGettingIntoTheEntity extends StandEntityAction {
             return ActionConditionResult.NEGATIVE;
         }
         Entity targetEntity = target.getEntity();
-        if (targetEntity.is(power.getUser())) {
-            return ActionConditionResult.NEGATIVE;
-        }
-        if (!(targetEntity instanceof LivingEntity)) {
+        if (targetEntity.is(power.getUser()) || !(targetEntity instanceof LivingEntity) ||
+                targetEntity instanceof StandEntity) {
             return ActionConditionResult.NEGATIVE;
         }
         if (stand instanceof AquaNecklaceEntity && ((AquaNecklaceEntity)stand).isInside()) {
@@ -59,11 +57,6 @@ public class AquaNecklaceGettingIntoTheEntity extends StandEntityAction {
     @Override
     public TargetRequirement getTargetRequirement() {
         return TargetRequirement.ENTITY;
-    }
-
-    @Override
-    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {
-//        standEntity.getLook
     }
 
     @Override
