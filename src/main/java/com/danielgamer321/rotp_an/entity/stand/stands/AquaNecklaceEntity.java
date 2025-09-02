@@ -29,6 +29,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -329,10 +330,20 @@ public class AquaNecklaceEntity extends StandEntity {
                 stand.consumeStamina(40);
             });
         }
-        if (isInside() && this.getBoundingBox().getSize() * 1.5D >= getTargetInside().getBoundingBox().getSize()) {
-            StandEntityDamageSource damage = new StandEntityDamageSource("stand", this, getUserPower());
-            damage.bypassArmor();
-            DamageUtil.hurtThroughInvulTicks(getTargetInside(), damage.setKnockbackReduction(0), getTargetInside().getMaxHealth());
+        if (isInside()) {
+            LivingEntity target = getTargetInside();
+            if (this.getBoundingBox().getSize() * 1.5D >= target.getBoundingBox().getSize()) {
+                StandEntityDamageSource damage = new StandEntityDamageSource("stand", this, getUserPower());
+                damage.bypassArmor();
+                if (target.isSleeping()) {
+                    if (!(target instanceof PlayerEntity || target instanceof VillagerEntity) || AddonInteractionUtil.getLFShrink(target) == 1) {
+                        target.stopSleeping();
+                    }
+                }
+                else {
+                    DamageUtil.hurtThroughInvulTicks(getTargetInside(), damage.setKnockbackReduction(0), getTargetInside().getMaxHealth());
+                }
+            }
         }
         boolean canSee = getTargetInside() != null && (AquaNecklaceHeavyPunch.isASkeleton(getTargetInside()));
         if ((isInside() && !canSee) || (getState() == 1 && isInWaterOrRain() && getCurrentTaskAction() != InitStands.AQUA_NECKLACE_GETTING_INTO_ENTITY.get())) {

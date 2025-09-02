@@ -2,8 +2,11 @@ package com.danielgamer321.rotp_an.client;
 
 import com.danielgamer321.rotp_an.RotpAquaAddon;
 import com.danielgamer321.rotp_an.client.render.entity.renderer.stand.AquaNecklaceRenderer;
+import com.danielgamer321.rotp_an.client.ui.marker.AquaNecklaceMarker;
 import com.danielgamer321.rotp_an.init.AddonStands;
 
+import com.github.standobyte.jojo.client.ui.marker.MarkerRenderer;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -16,5 +19,11 @@ public class ClientInit {
     @SubscribeEvent
     public static void onFMLClientSetup(FMLClientSetupEvent event) {
         RenderingRegistry.registerEntityRenderingHandler(AddonStands.AQUA_NECKLACE.getEntityType(), AquaNecklaceRenderer::new);
+
+        event.enqueueWork(() -> {
+            Minecraft mc = event.getMinecraftSupplier().get();
+
+            MarkerRenderer.Handler.addRenderer(new AquaNecklaceMarker(mc));
+        });
     }
 }

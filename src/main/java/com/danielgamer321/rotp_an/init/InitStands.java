@@ -73,7 +73,7 @@ public class InitStands {
                     .shiftVariationOf(AQUA_NECKLACE_CHANGE_TO_LIQUID)));
 
     public static final RegistryObject<StandEntityAction> AQUA_NECKLACE_GETTING_INTO_ENTITY = ACTIONS.register("aqua_necklace_getting_into_entity",
-            () -> new AquaNecklaceGettingIntoTheEntity(new StandEntityAction.Builder().staminaCost(40).holdToFire(20, false).cooldown(5)
+            () -> new AquaNecklaceGettingIntoTheEntity(new StandEntityAction.Builder().staminaCost(40).holdToFire(20, false).cooldown(10)
                     .resolveLevelToUnlock(2)
                     .partsRequired(StandPart.MAIN_BODY)));
 
