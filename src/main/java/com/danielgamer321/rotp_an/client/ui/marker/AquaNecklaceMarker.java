@@ -3,8 +3,10 @@ package com.danielgamer321.rotp_an.client.ui.marker;
 import com.danielgamer321.rotp_an.RotpAquaAddon;
 import com.danielgamer321.rotp_an.entity.stand.stands.AquaNecklaceEntity;
 import com.danielgamer321.rotp_an.init.AddonStands;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.marker.MarkerRenderer;
 import com.github.standobyte.jojo.init.ModStatusEffects;
+import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.client.Minecraft;
@@ -14,11 +16,13 @@ import net.minecraft.util.math.vector.Vector3d;
 
 import java.util.List;
 
+import static com.github.standobyte.jojo.power.impl.stand.IStandPower.getPlayerStandPower;
+
 
 public class AquaNecklaceMarker extends MarkerRenderer {
 
     public AquaNecklaceMarker(Minecraft mc) {
-        super(AddonStands.AQUA_NECKLACE.getStandType().getColor(), new ResourceLocation(RotpAquaAddon.MOD_ID, "textures/power/aqua_necklace.png"), mc);
+        super(new ResourceLocation(RotpAquaAddon.MOD_ID, "textures/power/aqua_necklace.png"), mc);
     }
     @Override
     protected boolean shouldRender() {
@@ -39,6 +43,17 @@ public class AquaNecklaceMarker extends MarkerRenderer {
                 }
             });
         }
+    }
+
+    @Override
+    protected ResourceLocation getIcon() {
+        ResourceLocation path = super.getIcon();
+        if (IStandPower.getStandPowerOptional(mc.player).map(IPower::hasPower).orElse(false)) {
+            IStandPower power = getPlayerStandPower(mc.player);
+            path = StandSkinsManager.getInstance().getRemappedResPath(manager -> manager
+                    .getStandSkin(power.getStandInstance().get()), path);
+        }
+        return path;
     }
 }
 

@@ -9,12 +9,10 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
-import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
-import com.github.standobyte.jojo.entity.damaging.projectile.MRFireballEntity;
-import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
-import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.*;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.MRRedBindEntity;
 import com.github.standobyte.jojo.entity.stand.*;
+import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
@@ -31,6 +29,8 @@ import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -49,6 +49,8 @@ import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
+
+import static com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper.addParticle;
 
 public class AquaNecklaceEntity extends StandEntity {
 
@@ -169,12 +171,11 @@ public class AquaNecklaceEntity extends StandEntity {
 
     @Override
     public boolean hurt(DamageSource dmgSource, float dmgAmount) {
-        if (getState() == 1 && !isInside()) {
-            this.level.getEntitiesOfClass(PlayerEntity.class, this.getBoundingBox().inflate(32)).forEach(entity -> {
-                if (entity.level.isClientSide() && ClientUtil.canSeeStands()) {
-                    this.doWaterSplashEffect();
-                }
-            });
+        if (getState() == 1 && (!isInside() || (isInside() && AquaNecklaceHeavyPunch.isASkeleton(getTargetInside())))) {
+            dmgSource.getDirectEntity();
+            if (this.level.isClientSide() && ClientUtil.canSeeStands()) {
+                this.doWaterSplashEffect();
+            }
         }
         return super.hurt(dmgSource, dmgAmount);
     }
@@ -288,14 +289,10 @@ public class AquaNecklaceEntity extends StandEntity {
     public void tick() {
         super.tick();
         if (getRemainingFireTicks() > 0) {
-            this.setSecondsOnFire(0);
-            if (!isInside() || (isInside() && (AquaNecklaceHeavyPunch.isASkeleton(getTargetInside())))) {
+            this.clearFire();
+            if (!isInside() || (isInside() && AquaNecklaceHeavyPunch.isASkeleton(getTargetInside()))) {
                 MCUtil.playSound(level, null, this.getX(), this.getY(), this.getZ(),
                         SoundEvents.FIRE_EXTINGUISH, this.getSoundSource(), 1.0F, 1.0F, StandUtil::playerCanHearStands);
-                if (ClientUtil.canSeeStands()) {
-                    ((ServerWorld)level).sendParticles(ParticleTypes.SMOKE, this.getX(), this.getY(), this.getZ(), 8,
-                            this.getBbWidth() / 2F, this.getBbHeight() / 2F, this.getBbWidth() / 2F, 0);
-                }
             }
         }
         LivingEntity user = getUser();

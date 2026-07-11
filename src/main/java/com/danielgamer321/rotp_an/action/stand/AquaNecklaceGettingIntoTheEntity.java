@@ -12,12 +12,15 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeMod;
 
 public class AquaNecklaceGettingIntoTheEntity extends StandEntityAction {
     public AquaNecklaceGettingIntoTheEntity(Builder builder) {
@@ -66,7 +69,7 @@ public class AquaNecklaceGettingIntoTheEntity extends StandEntityAction {
         if (!world.isClientSide()) {
             ActionTarget target = task.getTarget();
             LivingEntity livingTarget = (LivingEntity) target.getEntity();
-            if (standEntity instanceof AquaNecklaceEntity){
+            if (standEntity instanceof AquaNecklaceEntity) {
                 AquaNecklaceEntity aqua = (AquaNecklaceEntity) standEntity;
                 aqua.setTargetInside(livingTarget);
                 InitStands.AQUA_NECKLACE_LEAVE_THE_ENTITY.get().setCooldownOnUse(userPower);
@@ -76,11 +79,21 @@ public class AquaNecklaceGettingIntoTheEntity extends StandEntityAction {
 
     @Override
     public int getHoldDurationToFire(IStandPower power) {
-        RayTraceResult target = InputHandler.getInstance().mouseTarget;
-        ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);
-        Entity entity = actionTarget.getEntity();
-        return entity instanceof LivingEntity && (AquaNecklaceHeavyPunch.isASkeleton((LivingEntity) entity)) ?
-                10 : super.getHoldDurationToFire(power);
+        if (power.getUser() != null) {
+            LivingEntity user = power.getUser();
+            LivingEntity entity = power.isActive() && power.getStandManifestation() instanceof StandEntity &&
+                    ((StandEntity) power.getStandManifestation()).isManuallyControlled() ?
+                    (StandEntity) power.getStandManifestation() : user;
+            RayTraceResult rayTrace = JojoModUtil.rayTrace(entity.getEyePosition(1.0F), entity.getLookAngle(),
+                    user.getAttributeValue(ForgeMod.REACH_DISTANCE.get()),
+                    entity.level, entity, e -> !e.is(user), 0, 0);
+            if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
+                Entity target = ((EntityRayTraceResult) rayTrace).getEntity();
+                return target instanceof LivingEntity && (AquaNecklaceHeavyPunch.isASkeleton((LivingEntity) target)) ?
+                        10 : super.getHoldDurationToFire(power);
+            }
+        }
+        return super.getHoldDurationToFire(power);
     }
 
     @Override
